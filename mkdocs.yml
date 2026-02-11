@@ -1,0 +1,48 @@
+site_name: Junior DevOps Course
+site_author: Denis Fedosov
+site_description: 7-дневный путь от Linux до Архитектуры.
+
+# Theme configuration (Material is the standard for tech docs)
+theme:
+  name: material
+  language: ru
+  palette: 
+    # Palette toggle for automatic dark mode
+    - scheme: default
+      primary: blue grey
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue grey
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant      # SPA-like loading
+    - navigation.tracking     # URL updates on scroll
+    - navigation.sections     # Grouped nav
+    - content.code.copy       # Copy button for code blocks
+    - navigation.footer       # Next/Prev buttons
+
+# Extensions to make Markdown look professional
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences  # For nested code blocks
+  - admonition            # For !! Note blocks
+  - pymdownx.details      # For collapsible blocks
+  - attr_list             # For custom attributes
+
+# Course Structure
+nav:
+  - О курсе: index.md
+  - День 1. Linux & Bash: day1-linux-bash.md
+  - День 2. Git & Systemd: day2-git-systemd.md
+  - День 3. Docker & Compose: day3-docker-compose.md
+  - День 4. Сети & Scaling: day4-networking-scaling.md
+  - День 5. Python Automation: day5-python-scripting.md
+  - День 6. Мониторинг: day6-monitoring-stability.md
+  - День 7. Архитектура: day7-microservices-next.md
