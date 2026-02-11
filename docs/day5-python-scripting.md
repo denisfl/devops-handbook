@@ -25,7 +25,26 @@
 3.  **Functions**: Разбиваем логику на атомарные куски.
 4.  **Entry Point**: Блок `if __name__ == "__main__":`, откуда начинается исполнение.
 
+### Экология: Virtual Environments
+
+Прежде чем писать код, запомните главное правило Python-разработчика: **Никогда не ставьте пакеты в системный Python**.
+В Linux системный Python используется самой ОС (например, пакетный менеджер `dnf` или `apt` написан на Python). Если вы сделаете `sudo pip install requests` и обновите версию библиотеки, вы можете сломать половину системных утилит.
+
+Используйте **Virtual Environments (venv)**. Это изолированные песочницы для каждого проекта.
+
+```bash
+# Создаем песочницу в папке .venv
+python3 -m venv .venv
+
+# Активируем её (меняет пути в терминале)
+source .venv/bin/activate
+
+# Теперь pip ставит пакеты только сюда
+pip install requests
+```
+
 ### Обработка ошибок: Safety First
+
 В отличие от учебных задач, в реальной инфраструктуре всё ломается. Сеть моргает, диск заполняется, API возвращает 500-ю ошибку.
 Bash по умолчанию идет дальше, даже если команда упала (если не включить `set -e`). Python бросает **Исключение (Exception)**.
 Конструкция `try / except` — это ваш страховой полис. Она позволяет скрипту пережить сбой и корректно сообщить о проблеме, вместо того чтобы молча упасть.
@@ -35,9 +54,11 @@ Bash по умолчанию идет дальше, даже если коман
 ## Практика
 
 ### 1. Health Check 2.0
+
 Разберем классическую задачу: мониторинг доступности сайта. На Bash это заняло бы строк 10 с `curl`. На Python это выглядит чуть объемнее, но дает полный контроль.
 
 Скрипт `check_site.py`:
+
 ```python
 import requests  # Библиотека для HTTP запросов
 import time
@@ -49,19 +70,19 @@ def check_url(url):
     try:
         # Отправляем GET запрос с таймаутом 5 секунд
         response = requests.get(url, timeout=5)
-        
+
         # Если статус 200 (ОК)
         if response.status_code == 200:
             return True, response.elapsed.total_seconds()
         else:
             print(f"⚠️ Status code: {response.status_code}")
             return False, 0
-            
+
     except requests.exceptions.ConnectionError:
         print("❌ Connection Error: DNS failure or Refused")
     except requests.exceptions.Timeout:
         print("⏰ Timeout: Server is too slow")
-    
+
     return False, 0
 
 if __name__ == "__main__":
@@ -69,21 +90,24 @@ if __name__ == "__main__":
     while True:
         is_up, duration = check_url(URL)
         timestamp = datetime.now().strftime("%H:%M:%S")
-        
+
         if is_up:
             print(f"[{timestamp}] ✅ UP ({duration:.2f}s)")
         else:
             print(f"[{timestamp}] ❌ DOWN")
-            
+
         time.sleep(5)
 ```
+
 Обратите внимание: мы обрабатываем конкретные типы ошибок. Это позволяет отличать "сайт лежит" от "интернет пропал".
 
 ### 2. Анализ логов (Log Parsing)
+
 Представьте, что у вас есть лог-файл на 10 Гигабайт. Загружать его целиком в память (`f.read()`) нельзя — сервер зависнет.
 Python позволяет читать файл **построчно**, как потоковый процессор.
 
 Создадим `server.log`:
+
 ```text
 INFO: User A logged in
 ERROR: Database connection failed
@@ -93,6 +117,7 @@ ERROR: Timeout
 ```
 
 Скрипт `analyzer.py`:
+
 ```python
 LOG_FILE = "server.log"
 
@@ -106,7 +131,7 @@ with open(LOG_FILE, "r") as f:
     # Итерация происходит строка за строкой, память не тратится
     for line in f:
         line = line.strip() # Убираем пробелы и перенос строки
-        
+
         if "ERROR" in line:
             print(f"Found Error: {line}")
             error_count += 1
@@ -119,6 +144,7 @@ print(f"Report: {error_count} errors, {critical_count} critical failures.")
 ```
 
 ### 3. Работа с API (JSON)
+
 DevOps часто перекладывает данные из одного API в другой (например, получить список серверов из AWS и добавить их в мониторинг).
 Python нативно работает с JSON: он превращает его в словарь.
 
@@ -131,10 +157,10 @@ url = "https://api.ipify.org?format=json"
 try:
     r = requests.get(url)
     data = r.json() # Парсим ответ (JSON -> Dict)
-    
+
     print(f"Raw data: {data}")
     print(f"My IP: {data['ip']}")
-    
+
 except Exception as e:
     print(f"Error: {e}")
 ```
@@ -143,6 +169,6 @@ except Exception as e:
 
 ## Ресурсы
 
-*   **[Automate the Boring Stuff with Python](https://automatetheboringstuff.com/)** — Культовая книга. Если вы не программист, начинайте с неё. Она учит решать бытовые задачи, а не алгоритмы сортировки.
-*   **[Python for DevOps](https://www.oreilly.com/library/view/python-for-devops/9781492057680/)** — Книга от O'Reilly, заточенная под инфраструктурные задачи.
-*   **[Real Python](https://realpython.com/)** — Лучший сборник туториалов в интернете.
+- **[Automate the Boring Stuff with Python](https://automatetheboringstuff.com/)** — Культовая книга. Если вы не программист, начинайте с неё. Она учит решать бытовые задачи, а не алгоритмы сортировки.
+- **[Python for DevOps](https://www.oreilly.com/library/view/python-for-devops/9781492057680/)** — Книга от O'Reilly, заточенная под инфраструктурные задачи.
+- **[Real Python](https://realpython.com/)** — Лучший сборник туториалов в интернете.
